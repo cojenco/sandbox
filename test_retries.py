@@ -234,7 +234,7 @@ def test_emul_api():
     r = _create_retry_test(method_name, instructions)   # create retry test and get unique identifier
     id = r["id"]
 
-    client = storage.Client()
+    client = storage.Client(client_options={"api_endpoint": _API_ACCESS_ENDPOINT})
     resources = _populate_resource(client, json_resource)   # populate resources
     print(resources)
 
