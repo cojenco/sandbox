@@ -210,10 +210,54 @@ def lock_retention_policy(client, _preconditions, bucket):
 
 # storage.objects.insert
 def upload_from_string(client, _preconditions, bucket):
-    bucket = client.get_bucket(bucket.name)
+    blob = client.bucket(bucket.name).blob(uuid.uuid4().hex)
+    if _preconditions:    
+        blob.upload_from_string("upload from string", if_metageneration_match=0)
+    else:
+        blob.upload_from_string("upload from string")
+
+# Q: object generation is randomly created in the emulator
+# storage.objects.copy
+def copy_blob(client, _preconditions, bucket, object):
+    bucket = client.bucket(bucket.name)
+    destination = client.bucket("bucket")
+    new_name = "new_name"
     if _preconditions:
-        blob = bucket.blob(uuid.uuid4().hex)
-        blob.upload_from_string("upload from string", if_generation_match=0)
+        bucket.copy_blob(object, destination, new_name=new_name, if_generation_match=0)
+    else:
+        bucket.copy_blob(object, destination)
+
+# Q: google.protobuf.json_format.ParseError
+# storage.objects.compose
+def compose_blob(client, _preconditions, bucket, object):
+    blob_2 = bucket.blob("blob2")
+    blob_2.upload_from_string("second blob coming")
+    sources = [blob_2]
+    generations = [blob_2.generation]
+    
+    if _preconditions:
+        object.compose(sources, if_generation_match=generations)
+    else:
+        object.compose(sources)
+
+# storage.buckets.setIamPolicy
+def set_iam_policy(client, _preconditions, bucket):
+    bucket = client.get_bucket("bucket")
+    role = "roles/storage.objectViewer"
+    member = _CONF_TEST_SERVICE_ACCOUNT_EMAIL
+
+    policy = bucket.get_iam_policy(requested_policy_version=3)
+    policy.bindings.append({
+        "role": role, 
+        "members": {
+            member
+        }
+    })
+
+    if _preconditions:
+        bucket.set_iam_policy(policy)
+    else:
+        bucket.set_iam_policy(policy)
 
 
 # === Run Main Function === #
@@ -222,14 +266,14 @@ def upload_from_string(client, _preconditions, bucket):
 def test_emul_api():
 
     ###### 1 - replace the correct endpoint(str)
-    method_name = "storage.buckets.get"
+    method_name = "storage.objects.copy"
     instructions = ["return-503", "return-503"]
 
     ###### 2 - fill in the correct preconditions(bool)
     _preconditions = True
 
     ###### 3 - enter the correct resources needed
-    json_resource = ["BUCKET"]
+    json_resource = ["BUCKET", "OBJECT"]
 
     r = _create_retry_test(method_name, instructions)   # create retry test and get unique identifier
     id = r["id"]
@@ -239,7 +283,7 @@ def test_emul_api():
     print(resources)
 
     ###### 4 - replace get_bucket with the correct corresponding libarary method 
-    _run_retry_test(id, get_bucket, _preconditions, **resources)    # run library test
+    _run_retry_test(id, copy_blob, _preconditions, **resources)    # run library test
 
     # get status with unique identifier
     status_response = _get_retry_test(id)
