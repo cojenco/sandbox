@@ -2,6 +2,7 @@ import requests
 import json
 import http
 import uuid
+import os
 
 from google.cloud import storage
 from google.auth.credentials import AnonymousCredentials
@@ -11,7 +12,7 @@ from google.auth.credentials import AnonymousCredentials
 
 
 # Emulator host
-_API_ACCESS_ENDPOINT = "http://127.0.0.1:9000"
+_API_ACCESS_ENDPOINT = os.getenv("STORAGE_EMULATOR_HOST", "http://127.0.0.1:9000")
 
 # Fake project and service accounts for emulator use
 _CONF_TEST_PROJECT_ID = "my-project-id"

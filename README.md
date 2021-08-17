@@ -9,6 +9,7 @@ pip install -r requirements.txt
 ## Set Environment Variables
 
 ```bash
+# This is already the default, so only needs set if using a different port
 export STORAGE_EMULATOR_HOST=http://localhost:9000
 ```
 
