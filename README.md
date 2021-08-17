@@ -12,10 +12,6 @@ pip install -r requirements.txt
 export STORAGE_EMULATOR_HOST=http://localhost:9000
 ```
 
-```bash
-export GOOGLE_APPLICATION_CREDENTIALS="<mykey>.json"
-```
-
 
 ## Start the Emulator
 
