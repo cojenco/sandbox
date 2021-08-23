@@ -131,7 +131,7 @@ def client_list_buckets(client, _preconditions, **_):
 def bucket_copy_blob(client, _preconditions, **resources):
     object = resources.get("object")
     bucket = client.bucket(resources.get("bucket").name)
-    destination = client.bucket("bucket")
+    destination = client.create_bucket(uuid.uuid4().hex)
     if _preconditions:
         bucket.copy_blob(
             object, destination, new_name=uuid.uuid4().hex, if_generation_match=0
