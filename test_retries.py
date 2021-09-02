@@ -73,7 +73,7 @@ def _populate_resource_bucket(client, resources):
 def _populate_resource_object(client, resources):
     bucket_name = resources["bucket"].name
     blob = client.bucket(bucket_name).blob(uuid.uuid4().hex)
-    blob.upload_from_string("hello world", checksum="crc32c")
+    blob.upload_from_string("hello world")
     blob.reload()
     resources["object"] = blob
 
